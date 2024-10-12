@@ -1,9 +1,9 @@
-name: Deploy to EC2
+name: Test SSH Connection to EC2
 
 on:
   push:
     branches:
-      - master # This triggers the action when code is pushed to the main branch
+      - master # This will trigger the action when code is pushed to the master branch
 
 jobs:
   deploy:
@@ -13,26 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build # Add your build step here, if any
-
-      - name: Deploy via SSH
+      - name: Test SSH connection
         uses: appleboy/ssh-action@v0.1.2
         with:
-          host: ${{ secrets.EC2_HOST }} # Add your EC2 public IP to GitHub secrets
-          username: ${{ secrets.EC2_USER }} # Add your EC2 user (typically "ec2-user")
-          key: ${{ secrets.EC2_KEY }} # Add your private key to GitHub secrets
+          host: ${{ secrets.EC2_HOST }} # The EC2 public IP from GitHub secrets
+          username: ${{ secrets.EC2_USER }} # Typically 'ec2-user'
+          key: ${{ secrets.EC2_KEY }} # The private key from GitHub secrets
           port: 22
-          script: |
-            cd /path/to/your/app                 # Replace with the path to your app on EC2
-            git pull origin main                 # Pull the latest changes
-            npm install                          # Install any new dependencies
-            pm2 restart node-app                 # Restart your app using PM2
+          script: echo "SSH connection successful!"
