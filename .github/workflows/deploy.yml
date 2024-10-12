@@ -18,9 +18,6 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm install
-
       - name: Build project
         run: npm run build
 
@@ -33,7 +30,7 @@ jobs:
           port: 22
           debug: true
           script: |
-            cd /path/to/your/app
-            git pull origin master
-            npm install                          # Install dependencies on the EC2 instance
-            pm2 restart node-app                 # Restart your app using PM2
+            cd /home/ec2-user/oumli-api  # Replace with the correct path to your app
+            git pull origin master        # Pull the latest changes
+            npm install                   # Install dependencies
+            pm2 restart node-app          # Restart your app with PM2
