@@ -33,7 +33,7 @@ jobs:
           port: 22
           debug: true
           script: |
-            cd /home/ec2-user/oumli-api  # Replace with the correct path to your app
+            cd /home/ec2-user/oumli-api   # Replace with the correct path to your app
             git pull origin master        # Pull the latest changes
             npm install                   # Install dependencies
             pm2 restart node-app          # Restart your app with PM2
