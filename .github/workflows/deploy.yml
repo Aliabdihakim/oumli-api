@@ -33,7 +33,9 @@ jobs:
           port: 22
           debug: true
           script: |
-            cd /home/ec2-user/oumli-api   # Replace with the correct path to your app
-            git pull origin master        # Pull the latest changes
-            npm install                   # Install dependencies
-            pm2 restart node-app          # Restart your app with PM2
+            eval "$(ssh-agent -s)"                          # Start SSH agent
+            ssh-add ~/.ssh/id_rsa_github                    # Add GitHub key
+            cd /home/ec2-user/oumli-api                     # Go to app directory
+            git pull origin master                          # Pull latest changes
+            npm install                                     # Install dependencies
+            pm2 restart node-app                            # Restart app
