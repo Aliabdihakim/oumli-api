@@ -11,7 +11,7 @@ export const getAllProducts = async (
     const products = await prisma.product.findMany();
     res.status(200).json({
       status: "success",
-      message: "Products fetched successfully",
+      message: "Products fetched successfully NEW",
       data: products,
     });
   } catch (error) {
