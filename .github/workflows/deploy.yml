@@ -18,19 +18,22 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Build project
         run: npm run build
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }} # EC2 public IP or domain (e.g., production.api.oumli.com)
+          host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           port: 22
           debug: true
           script: |
-            cd /path/to/your/app                 # Replace with the path to your app on EC2
-            git pull origin master               # Pull the latest changes from GitHub
-            npm install                          # Install new dependencies
-            pm2 restart node-app                 # Restart your Node.js app using PM2
+            cd /path/to/your/app
+            git pull origin master
+            npm install                          # Install dependencies on the EC2 instance
+            pm2 restart node-app                 # Restart your app using PM2
