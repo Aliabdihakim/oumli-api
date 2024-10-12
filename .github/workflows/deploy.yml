@@ -14,10 +14,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Test SSH connection
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }} # The EC2 public IP from GitHub secrets
           username: ${{ secrets.EC2_USER }} # Typically 'ec2-user'
           key: ${{ secrets.EC2_KEY }} # The private key from GitHub secrets
           port: 22
+          debug: true
           script: echo "SSH connection successful!"
