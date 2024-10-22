@@ -1,16 +1,15 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-09-30.acacia",
-});
-
 const clientUrl =
   process.env.NODE_ENV === "production"
     ? "https://www.oumli.com"
     : "http://localhost:5173";
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: "2024-09-30.acacia",
+  });
   const { cartItems } = req.body;
 
   try {
