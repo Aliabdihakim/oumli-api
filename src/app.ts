@@ -17,11 +17,12 @@ const corsOptions = {
   credentials: true,
 };
 
+app.use("/api/webhook", webhookRoutes);
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/reviews", reviewsRoutes);
-app.use("/api/webhook", webhookRoutes);
 
 export default app;
