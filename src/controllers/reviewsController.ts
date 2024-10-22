@@ -8,13 +8,11 @@ export const getReviews = async (req: Request, res: Response) => {
     const reviews = await prisma.reviews.findMany({
       orderBy: { createdAt: "desc" },
     });
-    res
-      .status(200)
-      .json({
-        status: "success",
-        message: "Successfully fetched reviews",
-        data: reviews,
-      });
+    res.status(200).json({
+      status: "success",
+      message: "Successfully fetched reviews",
+      data: reviews,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({

@@ -4,6 +4,7 @@ import cors from "cors";
 import productRoutes from "./routes/productRoutes";
 import checkoutRoutes from "./routes/checkoutRoutes";
 import reviewsRoutes from "./routes/reviewsRoutes";
+import webhookRoutes from "./routes/webhookRoutes";
 
 import "dotenv/config";
 
@@ -21,5 +22,6 @@ app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/reviews", reviewsRoutes);
+app.use("/api/webhook", webhookRoutes);
 
 export default app;
