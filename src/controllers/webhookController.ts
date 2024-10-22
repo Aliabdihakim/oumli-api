@@ -14,7 +14,6 @@ export const stripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event;
 
   try {
-    // Use STRIPE_WEBHOOK_SECRET to validate the webhook signature
     event = stripe.webhooks.constructEvent(
       req.body,
       sig!,
@@ -29,6 +28,11 @@ export const stripeWebhook = async (req: Request, res: Response) => {
         session.customer_details?.email || "unknown@example.com";
       const customerName = session.customer_details?.name || "Guest";
       const amountTotal = session.amount_total;
+
+      // Retrieve the line items from the checkout session
+      const lineItems = await stripe.checkout.sessions.listLineItems(
+        session.id
+      );
 
       // Check if user exists, or create a new one
       let user = await prisma.user.findUnique({
@@ -46,7 +50,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       }
 
       // Create the order linked to the user
-      await prisma.orders.create({
+      const order = await prisma.orders.create({
         data: {
           userid: user.id, // Use existing or newly created user ID
           totalamount: amountTotal! / 100, // Convert from cents to dollars
@@ -55,7 +59,22 @@ export const stripeWebhook = async (req: Request, res: Response) => {
         },
       });
 
-      console.log(`Order for ${customerEmail} saved successfully!`);
+      // Create order items based on line items
+      const orderItemsData = lineItems.data.map((item) => ({
+        orderid: order.id,
+        productid: Number(item.price?.product), // Adjust as necessary to match your Product IDs
+        quantity: item.quantity || 1,
+        price: item.amount_total / 100,
+      }));
+
+      // Save order items in the database
+      await prisma.order_items.createMany({
+        data: orderItemsData,
+      });
+
+      console.log(
+        `Order for ${customerEmail} saved successfully with order items!`
+      );
     }
 
     res.status(200).json({ received: true });
