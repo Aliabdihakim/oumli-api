@@ -8,10 +8,18 @@ export const getAllProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+      include: {
+        attributes: {
+          include: {
+            attribute: true,
+          },
+        },
+      },
+    });
     res.status(200).json({
       status: "success",
-      message: "Products fetched successfully NEW",
+      message: "Products fetched successfully",
       data: products,
     });
   } catch (error) {
