@@ -60,17 +60,34 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       });
 
       // Create order items based on line items
-      const orderItemsData = lineItems.data.map((item) => ({
-        orderid: order.id,
-        productid: Number(item.price?.product), // Adjust as necessary to match your Product IDs
-        quantity: item.quantity || 1,
-        price: item.amount_total / 100,
-      }));
+      const orderItemsData = await Promise.all(
+        lineItems.data.map(async (item) => {
+          // Assuming product ID is stored in metadata, adjust as needed
+          const stripeProduct = await stripe.products.retrieve(
+            item.price?.product as string
+          );
+          const productid = Number(stripeProduct.metadata.productid); // Ensure your Stripe product has this metadata
 
-      // Save order items in the database
-      await prisma.order_items.createMany({
-        data: orderItemsData,
-      });
+          return {
+            orderid: order.id,
+            productid,
+            quantity: item.quantity || 1,
+            price: item.amount_total / 100,
+          };
+        })
+      );
+
+      // Filter out invalid order items (e.g., if productid is missing or NaN)
+      const validOrderItems = orderItemsData.filter(
+        (item) => !isNaN(item.productid)
+      );
+
+      if (validOrderItems.length > 0) {
+        // Save order items in the database
+        await prisma.order_items.createMany({
+          data: validOrderItems,
+        });
+      }
 
       console.log(
         `Order for ${customerEmail} saved successfully with order items!`
