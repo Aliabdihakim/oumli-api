@@ -5,7 +5,7 @@ import Stripe from "stripe";
 const prisma = new PrismaClient();
 
 export const stripeWebhook = async (req: Request, res: Response) => {
-  const stripe = new Stripe(process.env.STRIPE_WEBHOOK_SECRET as string, {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
     apiVersion: "2024-09-30.acacia",
   });
 
@@ -14,6 +14,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event;
 
   try {
+    // Use STRIPE_WEBHOOK_SECRET to validate the webhook signature
     event = stripe.webhooks.constructEvent(
       req.body,
       sig!,
@@ -23,15 +24,31 @@ export const stripeWebhook = async (req: Request, res: Response) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      // Assuming the customer email and other details are part of the session
-      const customerEmail = session.customer_email;
-      const paymentIntentId = session.payment_intent;
+      // Extract customer details
+      const customerEmail =
+        session.customer_details?.email || "unknown@example.com";
+      const customerName = session.customer_details?.name || "Guest";
       const amountTotal = session.amount_total;
 
-      // Create an order in your database
+      // Check if user exists, or create a new one
+      let user = await prisma.user.findUnique({
+        where: { email: customerEmail },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            name: customerName,
+            email: customerEmail,
+            password: "", // Placeholder password, handle securely in a real application
+          },
+        });
+      }
+
+      // Create the order linked to the user
       await prisma.orders.create({
         data: {
-          userid: 1, // Replace this with the appropriate user ID or lookup based on session/customer
+          userid: user.id, // Use existing or newly created user ID
           totalamount: amountTotal! / 100, // Convert from cents to dollars
           currency: session.currency,
           status: "completed",
