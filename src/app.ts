@@ -11,15 +11,9 @@ import "dotenv/config";
 const app = express();
 
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://oumli.com",
-    "http://35.173.238.141",
-  ],
+  origin: ["http://localhost:5173", "https://oumli.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
 };
 
 app.use("/api/webhook", webhookRouter);
