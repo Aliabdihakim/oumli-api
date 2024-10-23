@@ -24,9 +24,8 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       const session = event.data.object as Stripe.Checkout.Session;
 
       // Extract customer details
-      const customerEmail =
-        session.customer_details?.email || "unknown@example.com";
-      const customerName = session.customer_details?.name || "Guest";
+      const customerEmail = session.customer_details?.email!;
+      const customerName = session.customer_details?.name!;
       const amountTotal = session.amount_total;
 
       // Retrieve the line items from the checkout session
