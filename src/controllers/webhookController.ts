@@ -23,17 +23,14 @@ export const stripeWebhook = async (req: Request, res: Response) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      // Extract customer details
       const customerEmail = session.customer_details?.email!;
       const customerName = session.customer_details?.name!;
       const amountTotal = session.amount_total;
 
-      // Retrieve the line items from the checkout session
       const lineItems = await stripe.checkout.sessions.listLineItems(
         session.id
       );
 
-      // Check if user exists, or create a new one
       let user = await prisma.user.findUnique({
         where: { email: customerEmail },
       });
@@ -43,29 +40,26 @@ export const stripeWebhook = async (req: Request, res: Response) => {
           data: {
             name: customerName,
             email: customerEmail,
-            password: "", // Placeholder password, handle securely in a real application
+            password: "",
           },
         });
       }
 
-      // Create the order linked to the user
       const order = await prisma.orders.create({
         data: {
-          userid: user.id, // Use existing or newly created user ID
-          totalamount: amountTotal! / 100, // Convert from cents to dollars
+          userid: user.id,
+          totalamount: amountTotal! / 100,
           currency: session.currency,
           status: "completed",
         },
       });
 
-      // Create order items based on line items
       const orderItemsData = await Promise.all(
         lineItems.data.map(async (item) => {
-          // Assuming product ID is stored in metadata, adjust as needed
           const stripeProduct = await stripe.products.retrieve(
             item.price?.product as string
           );
-          const productid = Number(stripeProduct.metadata.productid); // Ensure your Stripe product has this metadata
+          const productid = Number(stripeProduct.metadata.productid);
 
           return {
             orderid: order.id,
@@ -76,13 +70,11 @@ export const stripeWebhook = async (req: Request, res: Response) => {
         })
       );
 
-      // Filter out invalid order items (e.g., if productid is missing or NaN)
       const validOrderItems = orderItemsData.filter(
         (item) => !isNaN(item.productid)
       );
 
       if (validOrderItems.length > 0) {
-        // Save order items in the database
         await prisma.order_items.createMany({
           data: validOrderItems,
         });

@@ -20,10 +20,10 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
           name: item.name,
           images: [item.image],
           metadata: {
-            productid: item.id, // Pass the local product ID as metadata
+            productid: item.id,
           },
         },
-        unit_amount: item.price * 100, // Convert to cents
+        unit_amount: item.price * 100,
       },
       quantity: item.quantity,
     }));
